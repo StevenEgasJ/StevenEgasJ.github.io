@@ -4,6 +4,7 @@ const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '0.0.0.0';
 const NEWSAPI_KEY = process.env.NEWSAPI_KEY;
 
 if (!NEWSAPI_KEY) {
@@ -52,6 +53,17 @@ app.get('/api/news', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor iniciado en http://localhost:${PORT} — abre la app en esa URL`);
+// Health check endpoint for deploy platforms (doesn't expose the API key)
+app.get('/health', (req, res) => {
+  res.json({
+    ok: true,
+    pid: process.pid,
+    port: PORT,
+    newsapi_key_set: !!NEWSAPI_KEY
+  });
+});
+
+app.listen(PORT, HOST, () => {
+  console.log(`Servidor iniciado en http://${HOST}:${PORT} — abierto en todas las interfaces`);
+  console.log(`NEWSAPI_KEY set: ${!!NEWSAPI_KEY}`);
 });
